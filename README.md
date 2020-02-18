@@ -1,6 +1,6 @@
-#Map generator
+# Map generator
 
-##Project description
+## Project description
 Project contains two modules:
 1. main.py
 2. locations.py
