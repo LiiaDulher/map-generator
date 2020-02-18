@@ -5,6 +5,9 @@ import heapq
 
 
 class Point(object):
+    """
+    Point on the map, which has title, its coordinates and distance between this point and user.
+    """
     def __init__(self, title, lat, long, distance):
         self.title = title
         self.lat = lat
@@ -67,7 +70,14 @@ def calculate_distance(loc1, loc2):
     (list, list) -> num
     Calculates distance between two locations.
     """
-    return math.sqrt((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)
+    radius = 6373.0
+    dlon = math.radians(loc2[1] - loc1[1])
+    dlat = math.radians(loc2[0] - loc1[0])
+    a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(math.radians(loc1[0])) \
+        * math.cos(math.radians(loc2[0])) * math.sin(dlon / 2) * math.sin(dlon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+    return distance
 
 
 def find_locations(year, lat, long):
@@ -79,7 +89,6 @@ def find_locations(year, lat, long):
         os.system('python locations.py')
     file_name = 'locations/location_' + year + '.txt'
     if os.path.exists(file_name):
-        print('found')
         with open(file_name) as file:
             data = file.readlines()
             locations_heap = []
@@ -88,6 +97,7 @@ def find_locations(year, lat, long):
                 loc = line.split("\t")
                 loc_point = Point(loc[0], float(loc[1]), float(loc[2]),
                                   (-1) * calculate_distance([float(loc[1]), float(loc[2])], [lat, long]))
+                print(loc_point)
                 if len(locations_heap) < 10:
                     heapq.heappush(locations_heap, loc_point)
                 else:
@@ -121,6 +131,9 @@ def main():
     fg_pp = population_layer()
     world_map.add_child(fg_pp)
     loc_heap = find_locations(year, lat, long)
+    print('ta-da')
+    for i in loc_heap:
+        print(i)
     if not (loc_heap is None):
         fg_loc = locations_layer(loc_heap)
         world_map.add_child(fg_loc)

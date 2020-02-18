@@ -9,20 +9,26 @@ def read_locations(file_name):
     Reads data from file and returns list with film name, year and location.
     """
     with open(file_name, 'r', encoding='utf-8', errors='ignore') as file:
-        # data = file.readlines()
         line = file.readline()
         while not line.startswith("="):
             line = file.readline()
-        line = file.readline().strip()
         location_list = []
-        for i in range(1000000):
+        while line:
+            try:
+                line = file.readline().strip()
+            except EOFError:
+                break
             lst = re.split("\t+", line)
             if len(lst) == 3:
                 lst = lst[:2]
-            name = re.search('\"(.+)\"', lst[0]).group(1)
-            year = re.search('\((.+?)\)', lst[0]).group(1)
+            name = re.search('\"(.+)\"', lst[0])
+            year = re.search('\((\d+?)\)', lst[0])
+            if name and year:
+                name = name.group(1)
+                year = year.group(1)
+            else:
+                continue
             location_list.append([name, year, lst[1]])
-            line = file.readline().strip()
     return location_list
 
 
@@ -59,8 +65,7 @@ def main():
     for location in locations_list:
         coordinates = define_coordinates(location[-1])
         if not (coordinates is None):
-            lat, long = define_coordinates(location[-1])
-            write_location(location[0], location[1], lat, long)
+            write_location(location[0], location[1], coordinates[0], coordinates[1])
 
 
 if __name__ == "__main__":
